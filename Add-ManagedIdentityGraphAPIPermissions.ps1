@@ -1,3 +1,11 @@
+# Add Graph API permissions to a Managed Identity
+# Prerequisites: 
+# - AzureAD / AzureADPreview PowerShell module
+# - Cloud Application Administrator or higher admin role
+
+# Connect to Azure AD Powershell
+Connect-AzureAD
+
 # Initialize variables
 $GraphID = "00000003-0000-0000-c000-000000000000"
 $RequiredPermission = "Organization.Read.All"
