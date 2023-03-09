@@ -4,7 +4,7 @@
 ### Prerequisites
 # Required module: ExchangeOnlineManagement
 # Permissions: Up-to-date permissions documented in Learn - https://learn.microsoft.com/en-us/microsoft-365/compliance/data-classification-activity-explorer?view=o365-worldwide#roles-and-role-groups
-### Notes on use:
+### Notes on use
 # - Run script in VSCode or PowerShell, not ISE. ISE seems to mess with date variables.
 # - Adjust the StartDate, EndDate and Filter variables below to suit your needs.
 # - Note: For filters you also need to add the corresponding parameter to the Export-ActivityExplorerData commands (of which there are 2).
