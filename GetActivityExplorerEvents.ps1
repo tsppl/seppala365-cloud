@@ -15,8 +15,6 @@ Connect-IPPSSession
 # Initialize array for incoming data
 $allEvents = @()
 
-
-
 ## Set the _start date_ of the export to one of the options.
 ## Uncomment the one you want to use & leave the others as a template.
 
