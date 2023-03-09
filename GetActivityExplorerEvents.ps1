@@ -1,5 +1,5 @@
 ### GetActivityExplorerEvents.ps1 - written by Tatu Seppälä
-# Gets all available activity explorer events and saves them into an array variable called $allEvents
+# Gets all activity explorer events that match the given filters into an array variable called $allEvents
 # You can export the results as a .CSV with: $allEvents | export-csv <path>/<to>/<file>.csv -Encoding Unicode -NTI
 ### Prerequisites
 # Required module: ExchangeOnlineManagement
