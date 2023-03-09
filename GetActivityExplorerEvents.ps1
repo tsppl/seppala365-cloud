@@ -1,6 +1,6 @@
 ### GetActivityExplorerEvents.ps1 - written by Tatu Seppälä
 # Gets all available activity explorer events and saves them into an array variable called $allEvents
-# You can export the array into a .CSV with: $allEvents | export-csv <path>/<to>/<file>.csv -Encoding Unicode -NTI
+# You can export the results as a .CSV with: $allEvents | export-csv <path>/<to>/<file>.csv -Encoding Unicode -NTI
 ### Prerequisites
 # Required module: ExchangeOnlineManagement
 # Permissions: Up-to-date permissions documented in Learn - https://learn.microsoft.com/en-us/microsoft-365/compliance/data-classification-activity-explorer?view=o365-worldwide#roles-and-role-groups
