@@ -160,5 +160,5 @@ New-ComplianceSearch -Name "Discovery / Credentials: User Login Credentials / Hi
 # SIT: X.509 Certificate Private Key
 New-ComplianceSearch -Name "Discovery / Credentials: X.509 Certificate Private Key / High confidence" -SharePointLocation "All" -Description "Discovery search: X.509 Certificate Private Key / High confidence." -ContentMatchQuery 'SensitiveType:"X.509 Certificate Private Key|*|85.."'
 
-# Run all content searches
+# Run all content searches. Comment out the line below to not run the searches.
 Get-ComplianceSearch | Run-ComplianceSearch
