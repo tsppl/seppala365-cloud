@@ -1,3 +1,9 @@
+# ContentSearchQuickstart.ps1 - Get your SIT-based Content Searches set up fast without fuss!
+# Created by Tatu Seppälä in August 2024 - Connect with me at: https://www.linkedin.com/in/tatuseppala/
+# ⚠️ Note: You need to connect to the Security & Compliance PowerShell first with the command: Connect-IPPSSession
+# The command is included in the Exchange Online Management module: https://www.powershellgallery.com/packages/ExchangeOnlineManagement/3.5.1
+# 📃 For more details, see the documentation: https://learn.microsoft.com/en-us/powershell/module/exchange/connect-ippssession?view=exchange-ps
+
 # SIT: Financial / Credit card numbers
 New-ComplianceSearch -Name "Discovery / Financial / Credit card numbers / High confidence" -SharePointLocation "All" -Description "Discovery search: Credit card numbers in SharePoint Online and OneDrive with High confidence" -ContentMatchQuery 'SensitiveType:"Credit Card Number|*|85.."'
 
