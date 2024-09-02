@@ -10,154 +10,154 @@ New-ComplianceSearch -Name "Discovery / Passport numbers / Medium to High confid
 # SIT: National IDs
 New-ComplianceSearch -Name "Discovery / National IDs / Medium to High confidence" -SharePointLocation "All" -Description "Discovery search: National IDs in SharePoint Online and OneDrive with Medium to High confidence" -ContentMatchQuery 'SensitiveType:"International banking account number (IBAN)|*|85.."'
 
-# SIT: Combined credentials
+# SIT: Credentials / All combined
 New-ComplianceSearch -Name "Discovery / Any credentials / Medium to High confidence" -SharePointLocation "All" -Description "Discovery search: Any technical credentials in SharePoint Online with Medium to High confidence." -ContentMatchQuery 'SensitiveType:"Amazon S3 Client Secret Access Key|*|75.." OR SensitiveType:"ASP.NET Machine Key|*|75.." OR SensitiveType:"Azure AD Client Access Token|*|75.." OR SensitiveType:"Azure AD Client Secret|*|75.." OR SensitiveType:"Azure AD User Credentials|*|75.." OR SensitiveType:"Azure App Service Deployment Password|*|75.." OR SensitiveType:"Azure Batch Shared Access Key|*|75.." OR SensitiveType:"Azure Bot Framework Secret Key|*|75.." OR SensitiveType:"Azure Bot Service App Secret|*|75.." OR SensitiveType:"Azure Cognitive Search API Key|*|75.." OR SensitiveType:"Azure Cognitive Service Key|*|75.." OR SensitiveType:"Azure Container Registry Access Key|*|75.." OR SensitiveType:"Azure COSMOS DB Account Access Key|*|75.." OR SensitiveType:"Azure Databricks Personal Access Token|*|75.." OR SensitiveType:"Azure DevOps App Secret|*|75.." OR SensitiveType:"Azure DevOps Personal Access Token|*|75.." OR SensitiveType:"Azure DocumentDB Auth Key|*|85.." OR SensitiveType:"Azure EventGrid Access Key|*|75.." OR SensitiveType:"Azure Function Master / API Key|*|75.." OR SensitiveType:"Azure IAAS Database Connection String and Azure SQL Connection String|*|85.." OR SensitiveType:"Azure IoT Connection String|*|85.." OR SensitiveType:"Azure IoT Shared Access Key|*|75.." OR SensitiveType:"Azure Logic App Shared Access Signature|*|75.." OR SensitiveType:"Azure Machine Learning Web Service API Key|*|75.." OR SensitiveType:"Azure Maps Subscription Key|*|75.." OR SensitiveType:"Azure Publish Setting Password|*|85.." OR SensitiveType:"Azure Redis Cache Connection String|*|85.." OR SensitiveType:"Azure Redis Cache Connection String Password|*|75.." OR SensitiveType:"Azure SAS|*|85.." OR SensitiveType:"Azure Service Bus Connection String|*|85.." OR SensitiveType:"Azure Service Bus Shared Access Signature|*|75.." OR SensitiveType:"Azure Shared Access Key / Web Hook Token|*|75.." OR SensitiveType:"Azure SignalR Access Key|*|75.." OR SensitiveType:"Azure SQL Connection String|*|75.." OR SensitiveType:"Azure Storage Account Access Key|*|75.." OR SensitiveType:"Azure Storage Account Key|*|85.." OR SensitiveType:"Azure Storage Account Shared Access Signature|*|75.." OR SensitiveType:"Azure Storage Account Shared Access Signature for High Risk Resources|*|75.." OR SensitiveType:"Azure Subscription Management Certificate|*|75.." OR SensitiveType:"Client Secret / Api Key|*|75.." OR SensitiveType:"General Password|*|85.." OR SensitiveType:"General Symmetric Key|*|75.." OR SensitiveType:"GitHub Personal Access Token|*|75.." OR SensitiveType:"Google API key|*|75.." OR SensitiveType:"Http Authorization Header|*|75.." OR SensitiveType:"Microsoft Bing Maps Key|*|75.." OR SensitiveType:"Slack Access Token|*|75.." OR SensitiveType:"SQL Server Connection String|*|85.." OR SensitiveType:"User Login Credentials|*|75.." OR SensitiveType:"X.509 Certificate Private Key|*|75.."'
 
-# SIT: Amazon S3 Client Secret Access Key
+# SIT: Credentials / Amazon S3 Client Secret Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Amazon S3 Client Secret Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Amazon S3 Client Secret Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Amazon S3 Client Secret Access Key|*|85.."'
 
-# SIT: ASP.NET Machine Key
+# SIT: Credentials / ASP.NET Machine Key
 New-ComplianceSearch -Name "Discovery / Credentials: ASP.NET Machine Key / High confidence" -SharePointLocation "All" -Description "Discovery search: ASP.NET Machine Key / High confidence." -ContentMatchQuery 'SensitiveType:"ASP.NET Machine Key|*|85.."'
 
-# SIT: Azure AD Client Access Token
+# SIT: Credentials / Azure AD Client Access Token
 New-ComplianceSearch -Name "Discovery / Credentials: Azure AD Client Access Token / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure AD Client Access Token / High confidence." -ContentMatchQuery 'SensitiveType:"Azure AD Client Access Token|*|85.."'
 
-# SIT: Azure AD Client Secret
+# SIT: Credentials / Azure AD Client Secret
 New-ComplianceSearch -Name "Discovery / Credentials: Azure AD Client Secret / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure AD Client Secret / High confidence." -ContentMatchQuery 'SensitiveType:"Azure AD Client Secret|*|85.."'
 
-# SIT: Azure AD User Credentials
+# SIT: Credentials / Azure AD User Credentials
 New-ComplianceSearch -Name "Discovery / Credentials: Azure AD User Credentials / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure AD User Credentials / High confidence." -ContentMatchQuery 'SensitiveType:"Azure AD User Credentials|*|85.."'
 
-# SIT: Azure App Service Deployment Password
+# SIT: Credentials / Azure App Service Deployment Password
 New-ComplianceSearch -Name "Discovery / Credentials: Azure App Service Deployment Password / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure App Service Deployment Password / High confidence." -ContentMatchQuery 'SensitiveType:"Azure App Service Deployment Password|*|85.."'
 
-# SIT: Azure Batch Shared Access Key
+# SIT: Credentials / Azure Batch Shared Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Batch Shared Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Batch Shared Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Batch Shared Access Key|*|85.."'
 
-# SIT: Azure Bot Framework Secret Key
+# SIT: Credentials / Azure Bot Framework Secret Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Bot Framework Secret Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Bot Framework Secret Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Bot Framework Secret Key|*|85.."'
 
-# SIT: Azure Bot Service App Secret
+# SIT: Credentials / Azure Bot Service App Secret
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Bot Service App Secret / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Bot Service App Secret / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Bot Service App Secret|*|85.."'
 
-# SIT: Azure Cognitive Search API Key
+# SIT: Credentials / Azure Cognitive Search API Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Cognitive Search API Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Cognitive Search API Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Cognitive Search API Key|*|85.."'
 
-# SIT: Azure Cognitive Service Key
+# SIT: Credentials / Azure Cognitive Service Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Cognitive Service Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Cognitive Service Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Cognitive Service Key|*|85.."'
 
-# SIT: Azure Container Registry Access Key
+# SIT: Credentials / Azure Container Registry Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Container Registry Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Container Registry Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Container Registry Access Key|*|85.."'
 
-# SIT: Azure COSMOS DB Account Access Key
+# SIT: Credentials / Azure COSMOS DB Account Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure COSMOS DB Account Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure COSMOS DB Account Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure COSMOS DB Account Access Key|*|85.."'
 
-# SIT: Azure Databricks Personal Access Token
+# SIT: Credentials / Azure Databricks Personal Access Token
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Databricks Personal Access Token / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Databricks Personal Access Token / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Databricks Personal Access Token|*|85.."'
 
-# SIT: Azure DevOps App Secret
+# SIT: Credentials / Azure DevOps App Secret
 New-ComplianceSearch -Name "Discovery / Credentials: Azure DevOps App Secret / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure DevOps App Secret / High confidence." -ContentMatchQuery 'SensitiveType:"Azure DevOps App Secret|*|85.."'
 
-# SIT: Azure DevOps Personal Access Token
+# SIT: Credentials / Azure DevOps Personal Access Token
 New-ComplianceSearch -Name "Discovery / Credentials: Azure DevOps Personal Access Token / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure DevOps Personal Access Token / High confidence." -ContentMatchQuery 'SensitiveType:"Azure DevOps Personal Access Token|*|85.."'
 
-# SIT: Azure DocumentDB Auth Key
+# SIT: Credentials / Azure DocumentDB Auth Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure DocumentDB Auth Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure DocumentDB Auth Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure DocumentDB Auth Key|*|85.."'
 
-# SIT: Azure EventGrid Access Key
+# SIT: Credentials / Azure EventGrid Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure EventGrid Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure EventGrid Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure EventGrid Access Key|*|85.."'
 
-# SIT: Azure Function Master / API Key
+# SIT: Credentials / Azure Function Master / API Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Function Master / API Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Function Master / API Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Function Master / API Key|*|85.."'
 
-# SIT: Azure IAAS Database Connection String and Azure SQL Connection String
+# SIT: Credentials / Azure IAAS Database Connection String and Azure SQL Connection String
 New-ComplianceSearch -Name "Discovery / Credentials: Azure IAAS Database Connection String and Azure SQL Connection String / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure IAAS Database Connection String and Azure SQL Connection String / High confidence." -ContentMatchQuery 'SensitiveType:"Azure IAAS Database Connection String and Azure SQL Connection String|*|85.."'
 
-# SIT: Azure IoT Connection String
+# SIT: Credentials / Azure IoT Connection String
 New-ComplianceSearch -Name "Discovery / Credentials: Azure IoT Connection String / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure IoT Connection String / High confidence." -ContentMatchQuery 'SensitiveType:"Azure IoT Connection String|*|85.."'
 
-# SIT: Azure IoT Shared Access Key
+# SIT: Credentials / Azure IoT Shared Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure IoT Shared Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure IoT Shared Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure IoT Shared Access Key|*|85.."'
 
-# SIT: Azure Logic App Shared Access Signature
+# SIT: Credentials / Azure Logic App Shared Access Signature
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Logic App Shared Access Signature / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Logic App Shared Access Signature / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Logic App Shared Access Signature|*|85.."'
 
-# SIT: Azure Machine Learning Web Service API Key
+# SIT: Credentials / Azure Machine Learning Web Service API Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Machine Learning Web Service API Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Machine Learning Web Service API Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Machine Learning Web Service API Key|*|85.."'
 
-# SIT: Azure Maps Subscription Key
+# SIT: Credentials / Azure Maps Subscription Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Maps Subscription Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Maps Subscription Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Maps Subscription Key|*|85.."'
 
-# SIT: Azure Publish Setting Password
+# SIT: Credentials / Azure Publish Setting Password
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Publish Setting Password / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Publish Setting Password / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Publish Setting Password|*|85.."'
 
-# SIT: Azure Redis Cache Connection String
+# SIT: Credentials / Azure Redis Cache Connection String
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Redis Cache Connection String / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Redis Cache Connection String / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Redis Cache Connection String|*|85.."'
 
-# SIT: Azure Redis Cache Connection String Password
+# SIT: Credentials / Azure Redis Cache Connection String Password
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Redis Cache Connection String Password / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Redis Cache Connection String Password / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Redis Cache Connection String Password|*|85.."'
 
-# SIT: Azure SAS
+# SIT: Credentials / Azure SAS
 New-ComplianceSearch -Name "Discovery / Credentials: Azure SAS / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure SAS / High confidence." -ContentMatchQuery 'SensitiveType:"Azure SAS|*|85.."'
 
-# SIT: Azure Service Bus Shared Access Signature
+# SIT: Credentials / Azure Service Bus Shared Access Signature
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Service Bus Shared Access Signature / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Service Bus Shared Access Signature / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Service Bus Shared Access Signature|*|85.."'
 
-# SIT: Azure Shared Access Key / Web Hook Token
+# SIT: Credentials / Azure Shared Access Key / Web Hook Token
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Shared Access Key / Web Hook Token / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Shared Access Key / Web Hook Token / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Shared Access Key / Web Hook Token|*|85.."'
 
-# SIT: Azure SignalR Access Key
+# SIT: Credentials / Azure SignalR Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure SignalR Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure SignalR Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure SignalR Access Key|*|85.."'
 
-# SIT: Azure SQL Connection String
+# SIT: Credentials / Azure SQL Connection String
 New-ComplianceSearch -Name "Discovery / Credentials: Azure SQL Connection String / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure SQL Connection String / High confidence." -ContentMatchQuery 'SensitiveType:"Azure SQL Connection String|*|85.."'
 
-# SIT: Azure Storage Account Access Key
+# SIT: Credentials / Azure Storage Account Access Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Storage Account Access Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Storage Account Access Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Storage Account Access Key|*|85.."'
 
-# SIT: Azure Storage Account Key
+# SIT: Credentials / Azure Storage Account Key
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Storage Account Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Storage Account Key / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Storage Account Key|*|85.."'
 
-# SIT: Azure Storage Account Shared Access Signature
+# SIT: Credentials / Azure Storage Account Shared Access Signature
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Storage Account Shared Access Signature / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Storage Account Shared Access Signature / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Storage Account Shared Access Signature|*|85.."'
 
-# SIT: Azure Storage Account Shared Access Signature for High Risk Resources
+# SIT: Credentials / Azure Storage Account Shared Access Signature for High Risk Resources
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Storage Account Shared Access Signature for High Risk Resources / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Storage Account Shared Access Signature for High Risk Resources / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Storage Account Shared Access Signature for High Risk Resources|*|85.."'
 
-# SIT: Azure Subscription Management Certificate
+# SIT: Credentials / Azure Subscription Management Certificate
 New-ComplianceSearch -Name "Discovery / Credentials: Azure Subscription Management Certificate / High confidence" -SharePointLocation "All" -Description "Discovery search: Azure Subscription Management Certificate / High confidence." -ContentMatchQuery 'SensitiveType:"Azure Subscription Management Certificate|*|85.."'
 
-# SIT: Client Secret / Api Key
+# SIT: Credentials / Client Secret / Api Key
 New-ComplianceSearch -Name "Discovery / Credentials: Client Secret / Api Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Client Secret / Api Key / High confidence." -ContentMatchQuery 'SensitiveType:"Client Secret / Api Key|*|85.."'
 
-# SIT: General Password
+# SIT: Credentials / General Password
 New-ComplianceSearch -Name "Discovery / Credentials: General Password / High confidence" -SharePointLocation "All" -Description "Discovery search: General Password / High confidence." -ContentMatchQuery 'SensitiveType:"General Password|*|85.."'
 
-# SIT: General Symmetric Key
+# SIT: Credentials / General Symmetric Key
 New-ComplianceSearch -Name "Discovery / Credentials: General Symmetric Key / High confidence" -SharePointLocation "All" -Description "Discovery search: General Symmetric Key / High confidence." -ContentMatchQuery 'SensitiveType:"General Symmetric Key|*|85.."'
 
-# SIT: GitHub Personal Access Token
+# SIT: Credentials / GitHub Personal Access Token
 New-ComplianceSearch -Name "Discovery / Credentials: GitHub Personal Access Token / High confidence" -SharePointLocation "All" -Description "Discovery search: GitHub Personal Access Token / High confidence." -ContentMatchQuery 'SensitiveType:"GitHub Personal Access Token|*|85.."'
 
-# SIT: Google API key
+# SIT: Credentials / Google API key
 New-ComplianceSearch -Name "Discovery / Credentials: Google API key / High confidence" -SharePointLocation "All" -Description "Discovery search: Google API key / High confidence." -ContentMatchQuery 'SensitiveType:"Google API key|*|85.."'
 
-# SIT: Http Authorization Header
+# SIT: Credentials / Http Authorization Header
 New-ComplianceSearch -Name "Discovery / Credentials: Http Authorization Header / High confidence" -SharePointLocation "All" -Description "Discovery search: Http Authorization Header / High confidence." -ContentMatchQuery 'SensitiveType:"Http Authorization Header|*|85.."'
 
-# SIT: Microsoft Bing Maps Key
+# SIT: Credentials / Microsoft Bing Maps Key
 New-ComplianceSearch -Name "Discovery / Credentials: Microsoft Bing Maps Key / High confidence" -SharePointLocation "All" -Description "Discovery search: Microsoft Bing Maps Key / High confidence." -ContentMatchQuery 'SensitiveType:"Microsoft Bing Maps Key|*|85.."'
 
-# SIT: Slack Access Token
+# SIT: Credentials / Slack Access Token
 New-ComplianceSearch -Name "Discovery / Credentials: Slack Access Token / High confidence" -SharePointLocation "All" -Description "Discovery search: Slack Access Token / High confidence." -ContentMatchQuery 'SensitiveType:"Slack Access Token|*|85.."'
 
-# SIT: SQL Server Connection String
+# SIT: Credentials / SQL Server Connection String
 New-ComplianceSearch -Name "Discovery / Credentials: SQL Server Connection String / High confidence" -SharePointLocation "All" -Description "Discovery search: SQL Server Connection String / High confidence." -ContentMatchQuery 'SensitiveType:"SQL Server Connection String|*|85.."'
 
-# SIT: User Login Credentials
+# SIT: Credentials / User Login Credentials
 New-ComplianceSearch -Name "Discovery / Credentials: User Login Credentials / High confidence" -SharePointLocation "All" -Description "Discovery search: User Login Credentials / High confidence." -ContentMatchQuery 'SensitiveType:"User Login Credentials|*|85.."'
 
-# SIT: X.509 Certificate Private Key
+# SIT: Credentials / X.509 Certificate Private Key
 New-ComplianceSearch -Name "Discovery / Credentials: X.509 Certificate Private Key / High confidence" -SharePointLocation "All" -Description "Discovery search: X.509 Certificate Private Key / High confidence." -ContentMatchQuery 'SensitiveType:"X.509 Certificate Private Key|*|85.."'
 
 # Run all content searches. Comment out the line below to not run the searches.
