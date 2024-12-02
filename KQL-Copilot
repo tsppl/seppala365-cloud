@@ -1,0 +1,22 @@
+# KQL Queries for Fetching Microsoft Copilot Events from Log Analytics or Advanced Hunting
+
+(For Advanced Hunting, replace `TimeGenerated` with `Timestamp`)
+
+## Get All CopilotInteraction Events from Log Analytics
+
+```kql
+CloudAppEvents
+// Replace 1d below with the number of days back you want to fetch events from
+| where TimeGenerated >= ago(1d) and ActionType has "CopilotInteraction"
+| extend UserId = RawEventData.UserId,
+         UserKey = RawEventData.UserKey,
+         AISystemPlugin = RawEventData.CopilotEventData.ISystemPlugin,
+         AccessedResources = RawEventData.CopilotEventData.AccessedResources,
+         AppHost = RawEventData.CopilotEventData.AppHost,
+         Contexts = RawEventData.CopilotEventData.Contexts,
+         MessageIds = RawEventData.CopilotEventData.MessageIds,
+         Messages = RawEventData.CopilotEventData.Messages,
+         ModelTransparencyDetails = RawEventData.CopilotEventData.ModelTransparencyDetails,
+         ThreadId = RawEventData.CopilotEventData.ThreadId,
+         CopilotLogVersion = RawEventData.CopilotLogVersion
+| project ReportId, AccountDisplayName, UserId, UserKey, AppHost, AccessedResources, Contexts, ThreadId, MessageIds, Messages, AISystemPlugin, ModelTransparencyDetails, Application, ApplicationId, CopilotLogVersion
