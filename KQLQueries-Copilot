@@ -4,7 +4,6 @@
 
 ## Get All CopilotInteraction Events from Log Analytics
 
-```kql
 CloudAppEvents
 // Replace 1d below with the number of days back you want to fetch events from
 | where TimeGenerated >= ago(1d) and ActionType has "CopilotInteraction"
