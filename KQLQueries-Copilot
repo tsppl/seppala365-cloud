@@ -1,6 +1,5 @@
 # KQL Queries for Fetching Microsoft Copilot Events from Log Analytics or Advanced Hunting
-
-(For Advanced Hunting, replace `TimeGenerated` with `Timestamp`)
+# (For Advanced Hunting, replace `TimeGenerated` with `Timestamp`)
 
 ## Get All CopilotInteraction Events from Log Analytics
 
