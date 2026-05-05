@@ -1,7 +1,11 @@
-# Provided exclusively for demonstration and learning purposes. Not to be used as-is in production.
+# ⚠️ Provided exclusively for demonstration and learning purposes. Not to be used as-is in production or as a reference implementation.
+# Before running, you would add both your audit analytics lakehouse and per-environment Fabric link lakehouses as data sources.
+# Mark the audit analytics lakehouse as the default lakehouse for the notebook.
+# A proper version of this would have things like parametrization. This is full of hardcoded values etc. that are not best practice in production.
+
 # 🥉 Bronze processing
 
-# Define environments here. Add any environments you want to process as data sources first, then also add them below.
+# Define environments here. Add any environment-specific lakehouses you want to process as data sources first, then also add them below.
 environments = [
     {"name": "Personal Productivity",  "lakehouse": "dataverse_personalproductivity"}
 ]
@@ -85,6 +89,7 @@ changed_attr_schema = ArrayType(
 bronze = spark.table("bronze_audit")
 
 # ---- Load user bridge table ----
+# Note: This is actually hardcoded against Personal Productivity for the Silver refinement. Again, for demo purposes.
 users = spark.sql("""
     SELECT 
         systemuserid,
