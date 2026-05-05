@@ -1,7 +1,8 @@
 # ⚠️ Provided exclusively for demonstration and learning purposes. Not to be used as-is in production or as a reference implementation.
 # Before running, you would add both your audit analytics lakehouse and per-environment Fabric link lakehouses as data sources.
 # Mark the audit analytics lakehouse as the default lakehouse for the notebook.
-# A proper version of this would have things like parametrization. This is full of hardcoded values etc. that are not best practice in production.
+# A proper version of this would have things like parametrization and more careful handling of old value / new value, as these can contain PII.
+# This is also full of hardcoded values etc. that are not best practice in production.
 
 # 🥉 Bronze processing
 
