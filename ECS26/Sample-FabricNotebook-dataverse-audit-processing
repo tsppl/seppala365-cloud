@@ -1,0 +1,400 @@
+# Provided exclusively for demonstration and learning purposes. Not to be used as-is in production.
+# 🥉 Bronze processing
+
+# Define environments here. Add any environments you want to process as data sources first, then also add them below.
+environments = [
+    {"name": "Personal Productivity",  "lakehouse": "dataverse_personalproductivity"}
+]
+
+from pyspark.sql.functions import lit, current_timestamp
+from delta.tables import DeltaTable
+
+for env in environments:
+    source_table = f"{env['lakehouse']}.audit"
+    
+    # Read source audit logs
+    df = spark.sql(f"SELECT * FROM {source_table}") \
+         .withColumn("env", lit(env["name"])) \
+         .withColumn("source_lakehouse", lit(env["lakehouse"])) \
+         .withColumn("loaded_at", current_timestamp())
+    
+    # Write to Bronze in your default Lakehouse
+    df.write.format("delta") \
+      .mode("append") \
+      .option("mergeSchema", "true") \
+      .saveAsTable("dbo.bronze_audit")
+
+# 📝 Prepare metadata table to allow incremental writes
+
+# Create metadata table on first run (run once or check if exists)
+spark.sql("""
+    CREATE TABLE IF NOT EXISTS dbo.load_metadata (
+        env STRING,
+        last_createdon TIMESTAMP,
+        row_count LONG,
+        loaded_at TIMESTAMP
+    )
+""")
+
+for env in environments:
+    # Get high watermark for this environment
+    watermark = spark.sql(f"""
+        SELECT COALESCE(MAX(last_createdon), '1900-01-01') as hw
+        FROM dbo.load_metadata WHERE env = '{env["name"]}'
+    """).collect()[0]["hw"]
+    
+    df = spark.sql(f"""
+        SELECT * FROM {env['lakehouse']}.dbo.audit
+        WHERE createdon > '{watermark}'
+    """).withColumn("env", lit(env["name"])) \
+       .withColumn("loaded_at", current_timestamp())
+    
+    row_count = df.count()
+    
+    if row_count > 0:
+        df.write.format("delta").mode("append").saveAsTable("dbo.bronze_audit")
+        
+        # Update watermark
+        new_max = df.agg({"createdon": "max"}).collect()[0][0]
+        spark.sql(f"""
+            INSERT INTO dbo.load_metadata
+            VALUES ('{env["name"]}', '{new_max}', {row_count}, current_timestamp())
+        """)
+
+# 🥈 Silver processing
+from pyspark.sql.functions import (
+    col, when, lit, year, month, dayofmonth,
+    hour, date_format, concat, to_date,
+    trim, lower, from_json, explode_outer, size,
+    substring, split, element_at, expr
+)
+from pyspark.sql.types import (
+    ArrayType, StructType, StructField, StringType
+)
+
+# ---- Schema for the JSON changedAttributes format ----
+changed_attr_schema = ArrayType(
+    StructType([
+        StructField("logicalName", StringType(), True),
+        StructField("oldValue", StringType(), True),
+        StructField("newValue", StringType(), True)
+    ])
+)
+
+# ---- Read Bronze ----
+bronze = spark.table("bronze_audit")
+
+# ---- Load user bridge table ----
+users = spark.sql("""
+    SELECT 
+        systemuserid,
+        fullname,
+        internalemailaddress,
+        azureactivedirectoryobjectid,
+        domainname
+    FROM dataverse_PersonalProductivity.dbo.systemuser
+""")
+
+# ---- Action code mapping ----
+silver = bronze.withColumn("action_name",
+    when(col("action") == 1, "Create")
+    .when(col("action") == 2, "Update")
+    .when(col("action") == 3, "Delete")
+    .when(col("action") == 4, "Activate")
+    .when(col("action") == 5, "Deactivate")
+    .when(col("action") == 6, "Cascade")
+    .when(col("action") == 7, "Merge")
+    .when(col("action") == 8, "Assign")
+    .when(col("action") == 9, "Retrieve")
+    .when(col("action") == 10, "Close")
+    .when(col("action") == 11, "Share")
+    .when(col("action") == 12, "Unshare")
+    .when(col("action") == 13, "Assign")
+    .when(col("action") == 14, "Cancel")
+    .when(col("action") == 15, "Complete")
+    .when(col("action") == 20, "Resolve")
+    .when(col("action") == 21, "Reopen")
+    .when(col("action") == 27, "Publish")
+    .when(col("action") == 33, "Upsert")
+    .when(col("action") == 34, "Custom Action")
+    .when(col("action") == 41, "Access (Read)")
+    .when(col("action") == 51, "Share")
+    .when(col("action") == 53, "Assign Role to User")
+    .when(col("action") == 54, "Remove Role from User")
+    .when(col("action") == 55, "Assign Role to Team")
+    .when(col("action") == 56, "Remove Role from Team")
+    .when(col("action") == 57, "Inherit Role from Team")
+    .when(col("action") == 61, "User Access via Web")
+    .when(col("action") == 62, "User Access via Web Services")
+    .when(col("action") == 64, "Archive")
+    .when(col("action") == 65, "Retain")
+    .otherwise(concat(lit("Unknown ("), col("action").cast("string"), lit(")")))
+)
+
+# ---- Operation type mapping ----
+silver = silver.withColumn("operation_name",
+    when(col("operation") == 1, "Create")
+    .when(col("operation") == 2, "Update")
+    .when(col("operation") == 3, "Delete")
+    .when(col("operation") == 4, "Access")
+    .otherwise(concat(lit("Unknown ("), col("operation").cast("string"), lit(")")))
+)
+
+# ---- Security relevance flag ----
+silver = silver.withColumn("is_security_event",
+    when(col("action").isin(3, 8, 11, 12, 41, 51, 53, 54, 55, 56, 57), lit(True))
+    .otherwise(lit(False))
+)
+
+# ---- Time dimensions ----
+silver = silver \
+    .withColumn("audit_date", to_date(col("createdon"))) \
+    .withColumn("audit_year", year(col("createdon"))) \
+    .withColumn("audit_month", month(col("createdon"))) \
+    .withColumn("audit_day", dayofmonth(col("createdon"))) \
+    .withColumn("audit_hour", hour(col("createdon"))) \
+    .withColumn("audit_weekday", date_format(col("createdon"), "EEEE"))
+
+# ---- Join Entra identity for the acting user (userid) ----
+user_lookup = users.select(
+    col("systemuserid"),
+    col("fullname").alias("user_fullname"),
+    col("internalemailaddress").alias("user_email"),
+    col("azureactivedirectoryobjectid").alias("user_entra_oid"),
+    col("domainname").alias("user_upn")
+)
+
+silver = silver.join(
+    user_lookup,
+    silver["userid"] == user_lookup["systemuserid"],
+    "left"
+).drop("systemuserid")
+
+# ---- Join Entra identity for the calling user (impersonation detection) ----
+caller_lookup = users.select(
+    col("systemuserid"),
+    col("fullname").alias("caller_fullname"),
+    col("internalemailaddress").alias("caller_email"),
+    col("azureactivedirectoryobjectid").alias("caller_entra_oid"),
+    col("domainname").alias("caller_upn")
+)
+
+silver = silver.join(
+    caller_lookup,
+    silver["callinguserid"] == caller_lookup["systemuserid"],
+    "left"
+).drop("systemuserid")
+
+# ---- Impersonation flag ----
+silver = silver.withColumn("is_impersonated",
+    when(
+        (col("callinguserid").isNotNull()) & 
+        (col("callinguserid") != col("userid")),
+        lit(True)
+    ).otherwise(lit(False))
+)
+
+# ============================================================
+# CHANGEDATA PARSING
+# ============================================================
+
+# ---- Detect changedata format ----
+silver = silver.withColumn("changedata_format",
+    when(col("changedata").isNull(), lit(None))
+    .when(col("changedata").startswith("{"), lit("json"))
+    .when(col("action") == 64, lit("archive"))
+    .otherwise(lit("delimited"))
+)
+
+# ---- Parse JSON into array column ----
+silver = silver.withColumn("_parsed_json",
+    when(
+        col("changedata_format") == "json",
+        from_json(
+            expr("get_json_object(changedata, '$.changedAttributes')"),
+            changed_attr_schema
+        )
+    )
+)
+
+# Count changed fields before splitting
+silver = silver.withColumn("changed_field_count",
+    when(col("_parsed_json").isNotNull(), size(col("_parsed_json")))
+    .otherwise(lit(1))
+)
+
+# ---- Split into JSON rows and non-JSON rows ----
+silver_json = silver.filter(col("_parsed_json").isNotNull()) \
+    .withColumn("_attr", explode_outer(col("_parsed_json"))) \
+    .withColumn("changed_field", col("_attr.logicalName")) \
+    .withColumn("old_value", substring(col("_attr.oldValue"), 1, 500)) \
+    .withColumn("new_value", substring(col("_attr.newValue"), 1, 500)) \
+    .drop("_parsed_json", "_attr")
+
+silver_other = silver.filter(col("_parsed_json").isNull()) \
+    .withColumn("changed_field", lit(None).cast("string")) \
+    .withColumn("old_value", lit(None).cast("string")) \
+    .withColumn("new_value", lit(None).cast("string")) \
+    .drop("_parsed_json")
+
+# ---- Reunite ----
+silver = silver_json.unionByName(silver_other)
+
+# ---- Parse archive format (action 64): "MM/dd/yyyy HH:mm:ss,count" ----
+silver = silver \
+    .withColumn("changed_field",
+        when(
+            (col("changedata_format") == "archive") & col("changed_field").isNull(),
+            lit("archive_operation")
+        ).otherwise(col("changed_field"))
+    ) \
+    .withColumn("old_value",
+        when(
+            col("changedata_format") == "archive",
+            element_at(split(col("changedata"), ","), 1)
+        ).otherwise(col("old_value"))
+    ) \
+    .withColumn("new_value",
+        when(
+            col("changedata_format") == "archive",
+            element_at(split(col("changedata"), ","), 2)
+        ).otherwise(col("new_value"))
+    )
+
+# ---- Parse delimited format (action 48 etc.): "GUID,code~subcode" ----
+silver = silver \
+    .withColumn("changed_field",
+        when(
+            (col("changedata_format") == "delimited") & col("changed_field").isNull(),
+            element_at(split(col("changedata"), ","), 1)
+        ).otherwise(col("changed_field"))
+    ) \
+    .withColumn("new_value",
+        when(
+            (col("changedata_format") == "delimited") & (col("new_value").isNull()),
+            element_at(split(col("changedata"), ","), 2)
+        ).otherwise(col("new_value"))
+    )
+
+# ---- Write Silver ----
+silver.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable("silver_audit")
+
+# 🥇 Gold processing
+
+# ---- Gold: Security Events (rolling 12 months) ----
+gold_security = spark.sql("""
+    SELECT *
+    FROM silver_audit
+    WHERE (is_security_event = TRUE OR action = 48)
+      AND audit_date >= add_months(current_date(), -12)
+""")
+
+gold_security.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable("gold_security_events")
+
+
+# ---- Gold: Config Changes ----
+gold_config = spark.sql("""
+    SELECT *
+    FROM silver_audit
+    WHERE action = 2
+      AND objecttypecode IN ('organization', 'systemsettings')
+      AND audit_date >= add_months(current_date(), -12)
+""")
+
+gold_config.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable("gold_config_changes")
+
+
+# ---- Gold: Daily User Activity Summary ----
+gold_user_summary = spark.sql("""
+    SELECT 
+        audit_date,
+        env,
+        userid,
+        user_fullname,
+        user_upn,
+        user_entra_oid,
+        COUNT(*) as total_events,
+        SUM(CASE WHEN is_security_event THEN 1 ELSE 0 END) as security_events,
+        SUM(CASE WHEN is_impersonated THEN 1 ELSE 0 END) as impersonated_events,
+        COUNT(DISTINCT objecttypecode) as distinct_entities,
+        COUNT(DISTINCT action) as distinct_actions,
+        MIN(createdon) as first_activity,
+        MAX(createdon) as last_activity
+    FROM silver_audit
+    WHERE audit_date >= add_months(current_date(), -12)
+    GROUP BY audit_date, env, userid, user_fullname, user_upn, user_entra_oid
+""")
+
+gold_user_summary.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable("gold_user_activity_summary")
+
+
+# ---- Gold: Record Changes by User (with Entra OID) ----
+gold_record_changes = spark.sql("""
+    SELECT 
+        createdon,
+        audit_date,
+        env,
+        userid,
+        user_fullname,
+        user_upn,
+        user_entra_oid,
+        callinguserid,
+        caller_fullname,
+        caller_upn,
+        caller_entra_oid,
+        is_impersonated,
+        action,
+        action_name,
+        operation,
+        operation_name,
+        objecttypecode,
+        objectid,
+        objectidname,
+        changed_field,
+        old_value,
+        new_value,
+        changedata_format,
+        changed_field_count,
+        transactionid,
+        auditid
+    FROM silver_audit
+    WHERE action IN (1, 2, 3, 33)
+      AND user_entra_oid IS NOT NULL
+      AND audit_date >= add_months(current_date(), -12)
+""")
+
+gold_record_changes.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable("gold_record_changes_by_user")
+
+
+# ---- Gold: Identity Bridge (dimension table) ----
+gold_identity = spark.sql("""
+    SELECT DISTINCT
+        userid as systemuserid,
+        user_fullname,
+        user_email,
+        user_upn,
+        user_entra_oid,
+        env
+    FROM silver_audit
+    WHERE userid IS NOT NULL
+""")
+
+gold_identity.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable("gold_identity_bridge")
