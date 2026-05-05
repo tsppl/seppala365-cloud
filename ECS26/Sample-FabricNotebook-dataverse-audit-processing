@@ -102,6 +102,7 @@ users = spark.sql("""
 """)
 
 # ---- Action code mapping ----
+# Note: Mapping is illustrative and is based on Microsoft Learn documentation in May 2026. Always prepare your own mapping based on authoritative sources.
 silver = bronze.withColumn("action_name",
     when(col("action") == 1, "Create")
     .when(col("action") == 2, "Update")
