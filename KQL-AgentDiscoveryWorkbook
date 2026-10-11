@@ -1,0 +1,247 @@
+// ============================================================
+// LOCAL AI AGENT DISCOVERY & SECURITY POSTURE HUNTING QUERIES
+// FOR DEFENDER XDR ADVANCED HUNTING & SENTINEL
+// DRAFTED BY TATU SEPPÄLÄ / OCT 2026
+// ============================================================
+//
+// INSTRUCTIONS
+// 1. Keep the initial LocalAgents definition uncommented.
+// 2. Uncomment (CTRL+K, U) one reporting query at a time.
+// 3. Comment (CTRL+K, C) out the previously active report.
+//
+// ============================================================
+// SHARED DATASET - LATEST AGENT INVENTORY
+// ============================================================
+let LocalAgents = materialize(
+    AgentsInfo
+    | where Platform == "LocalAgents"
+    | summarize arg_max(Timestamp, *) by AgentId
+    | where LifecycleStatus !in~ ("Deleted", "Uninstalled")
+    | extend M = RawAgentInfo.localAgentMetadata
+    | extend Vendor = tostring(M.vendor),
+             AccountName = tostring(M.accountName),
+             AccountDomain = tostring(M.accountDomain),
+             UPN = tostring(M.upn),
+             OrgId = tostring(M.orgId),
+             Device = tostring(M.deviceName),
+             AADDeviceId = tostring(M.aadDeviceId),
+             OS = tostring(M.osPlatform),
+             OSVersion = tostring(M.osVersion),
+             DeviceType = tostring(M.deviceType),
+             DeviceSubtype = tostring(M.deviceSubtype),
+             Process = tostring(M.relatedProcess),
+             TrustedProcess = tolower(tostring(M.trustedProcess)),
+             AutoApprove = tolower(tostring(M.autoApprove)),
+             RemoteMcpCount = coalesce(array_length(McpServers), 0),
+             LocalMcpCount = coalesce(array_length(M.localMcps), 0),
+             LocalMcps = M.localMcps
+    | extend Account = case(
+        isnotempty(UPN), UPN,
+        isnotempty(AccountDomain) and isnotempty(AccountName), strcat(AccountDomain, "\\", AccountName),
+        isnotempty(AccountName), AccountName,
+        ""
+    )
+    | project Timestamp, AgentId, Name, Vendor, Version,
+              Account, AccountName, AccountDomain, UPN, OrgId,
+              Device, AADDeviceId, OS, OSVersion, DeviceType, DeviceSubtype,
+              Process, TrustedProcess, AutoApprove,
+              RemoteMcpCount, LocalMcpCount, McpServers, LocalMcps
+);
+// ============================================================
+// 01 - LATEST LOCAL AI AGENT INVENTORY
+// ============================================================
+// LocalAgents
+// | order by Timestamp desc
+// ============================================================
+// 02 - AGENT ADOPTION LEADERBOARD
+// Devices, accounts, installations and MCP prevalence
+// ============================================================
+// LocalAgents
+// | summarize AgentProfiles = count(),
+//             Devices = dcountif(Device, isnotempty(Device)),
+//             Users = dcountif(Account, isnotempty(Account)),
+//             ProfilesWithMCP = countif(RemoteMcpCount + LocalMcpCount > 0),
+//             Versions = make_set(Version, 20)
+//     by Name, Vendor
+// | order by Devices desc
+// ============================================================
+// 03 - SECURITY POSTURE DISTRIBUTION
+// Automatic approval vs. trusted hosting process
+// ============================================================
+// LocalAgents
+// | extend ApprovalMode = case(
+//     AutoApprove == "true", "Automatic",
+//     AutoApprove == "false", "Manual",
+//     "Unknown"
+// )
+// | extend HostTrust = case(
+//     TrustedProcess == "true", "Trusted",
+//     TrustedProcess == "false", "Untrusted",
+//     "Unknown"
+// )
+// | summarize AgentProfiles = count(),
+//             Devices = dcount(Device),
+//             AgentTypes = dcount(Name)
+//     by ApprovalMode, HostTrust
+// | order by AgentProfiles desc
+// ============================================================
+// 04 - RISKY AGENT CONFIGURATIONS
+// Automatically approving agents and untrusted processes
+// ============================================================
+// LocalAgents
+// | where AutoApprove == "true" or TrustedProcess == "false"
+// | extend TotalMCPs = RemoteMcpCount + LocalMcpCount
+// | extend InvestigationPriority = case(
+//     AutoApprove == "true" and TrustedProcess == "false" and TotalMCPs > 0, "1 - Highest",
+//     AutoApprove == "true" and TrustedProcess == "false", "2 - High",
+//     AutoApprove == "true" and TotalMCPs > 0, "3 - Elevated",
+//     "4 - Review"
+// )
+// | project InvestigationPriority, Name, Vendor, Device, Account,
+//           Version, Process, AutoApprove, TrustedProcess,
+//           RemoteMcpCount, LocalMcpCount, TotalMCPs, Timestamp
+// | order by InvestigationPriority asc, TotalMCPs desc
+// ============================================================
+// 05 - MCP SERVER INVENTORY AND PREVALENCE
+// Remote and local MCP servers across discovered agents
+// ============================================================
+// union (
+//     LocalAgents
+//     | mv-expand Server = McpServers
+//     | project AgentId, Agent = Name, Vendor, Device, Account,
+//               Origin = "Remote",
+//               ServerName = tostring(Server.name),
+//               Location = tostring(Server.endpoint),
+//               Transport = tostring(Server.type)
+// ), (
+//     LocalAgents
+//     | mv-expand Server = LocalMcps
+//     | project AgentId, Agent = Name, Vendor, Device, Account,
+//               Origin = "Local",
+//               ServerName = tostring(Server.name),
+//               Location = tostring(Server.commandName),
+//               Transport = tostring(Server.transportType)
+// )
+// | where isnotempty(ServerName) or isnotempty(Location)
+// | summarize AgentProfiles = dcount(AgentId),
+//             Devices = dcountif(Device, isnotempty(Device)),
+//             Agents = make_set(Agent, 20),
+//             Accounts = make_set(Account, 20)
+//     by ServerName, Origin, Transport, Location
+// | order by AgentProfiles desc
+// ============================================================
+// 06 - DEVICES WITH THE LARGEST AI AGENT FOOTPRINT
+// Agent diversity, MCP references and risky configurations
+// ============================================================
+// LocalAgents
+// | where isnotempty(Device)
+// | summarize UniqueAgents = dcount(Name),
+//             AgentProfiles = count(),
+//             Accounts = dcount(Account),
+//             AutoApproving = countif(AutoApprove == "true"),
+//             UntrustedProcesses = countif(TrustedProcess == "false"),
+//             RemoteMCPs = sum(RemoteMcpCount),
+//             LocalMCPs = sum(LocalMcpCount),
+//             AgentNames = make_set(Name, 30)
+//     by Device, OS, AADDeviceId
+// | extend TotalMCPs = RemoteMCPs + LocalMCPs
+// | order by UniqueAgents desc, TotalMCPs desc
+// ============================================================
+// 07 - VENDOR ORGANIZATIONS AND ACCOUNT CONCENTRATION
+// Identify different vendor organizations and workspaces
+// ============================================================
+// LocalAgents
+// | where isnotempty(OrgId)
+// | summarize AgentProfiles = count(),
+//             Devices = dcount(Device),
+//             Accounts = dcount(Account),
+//             AgentNames = make_set(Name, 20),
+//             AccountNames = make_set(Account, 50)
+//     by Vendor, OrgId
+// | order by Vendor asc, AgentProfiles desc
+// ============================================================
+// 08 - AI AGENT VERSION FRAGMENTATION
+// Version distribution by product, vendor and OS
+// ============================================================
+// LocalAgents
+// | where isnotempty(Version)
+// | summarize Devices = dcount(Device),
+//             AgentProfiles = count(),
+//             Accounts = dcount(Account)
+//     by Name, Vendor, Version, OS
+// | order by Name asc, Devices desc
+// ============================================================
+// 09 - NEW AI AGENT DISCOVERIES OVER TIME
+// First observed agent profiles during the last 30 days
+// ============================================================
+// AgentsInfo
+// | where Platform == "LocalAgents"
+// | summarize FirstSeen = min(Timestamp) by AgentId
+// | where FirstSeen >= ago(30d)
+// | join kind=inner (
+//     LocalAgents
+//     | project AgentId, Name, Vendor
+// ) on AgentId
+// | summarize NewAgentProfiles = count(),
+//             UniqueAgentTypes = dcount(Name)
+//     by Day = bin(FirstSeen, 1d), Vendor
+// | order by Day asc
+// ============================================================
+// 10 - SECURITY CONFIGURATION CHANGES
+// Detect changes to automatic approval and process trust
+// ============================================================
+// AgentsInfo
+// | where Platform == "LocalAgents"
+// | extend M = RawAgentInfo.localAgentMetadata
+// | extend AutoApprove = tolower(tostring(M.autoApprove)),
+//          TrustedProcess = tolower(tostring(M.trustedProcess))
+// | order by AgentId asc, Timestamp asc
+// | serialize PreviousAgentId = prev(AgentId),
+//             PreviousAutoApprove = prev(AutoApprove),
+//             PreviousTrustedProcess = prev(TrustedProcess)
+// | where AgentId == PreviousAgentId
+// | where (isnotempty(AutoApprove) and isnotempty(PreviousAutoApprove) and AutoApprove != PreviousAutoApprove)
+//      or (isnotempty(TrustedProcess) and isnotempty(PreviousTrustedProcess) and TrustedProcess != PreviousTrustedProcess)
+// | project Timestamp, AgentId, Name,
+//           Device = tostring(M.deviceName),
+//           Account = tostring(M.accountName),
+//           PreviousAutoApprove, AutoApprove,
+//           PreviousTrustedProcess, TrustedProcess
+// | order by Timestamp desc
+// ============================================================
+// 11 - RISKY AGENTS ON CRITICAL DEVICES
+// Correlate AgentsInfo with ExposureGraphNodes and Edges
+// Requires Exposure Graph data
+// ============================================================
+// LocalAgents
+// | where AutoApprove == "true" or TrustedProcess == "false"
+// | extend AgentKey = tostring(AgentId)
+// | join kind=inner (
+//     ExposureGraphNodes
+//     | where NodeLabel == "ai-agent"
+//     | where tostring(NodeProperties.rawData.aiAgentMetadata.platform) == "LocalAgents"
+//     | project AgentKey = tostring(NodeProperties.rawData.aiAgentMetadata.id),
+//               AgentNodeId = NodeId
+// ) on AgentKey
+// | join kind=inner (
+//     ExposureGraphEdges
+//     | where SourceNodeLabel == "ai-agent"
+//     | where EdgeLabel =~ "runs on"
+//     | where TargetNodeLabel in~ ("device", "ec2.instance", "microsoft.compute/virtualmachines")
+//     | project AgentNodeId = SourceNodeId,
+//               DeviceNodeId = TargetNodeId,
+//               GraphDevice = TargetNodeName
+// ) on AgentNodeId
+// | join kind=inner (
+//     ExposureGraphNodes
+//     | where NodeLabel in~ ("device", "ec2.instance", "microsoft.compute/virtualmachines")
+//     | extend CriticalityLevel = toint(NodeProperties.rawData.criticalityLevel.criticalityLevel)
+//     | where CriticalityLevel in (0, 1)
+//     | project DeviceNodeId = NodeId, CriticalityLevel
+// ) on DeviceNodeId
+// | project Device = GraphDevice,
+//           Criticality = case(CriticalityLevel == 0, "Very high", "High"),
+//           Name, Vendor, Version, Account,
+//           AutoApprove, TrustedProcess,
+//           RemoteMcpCount, LocalMcpCount
+// | order by Criticality asc, Device asc
