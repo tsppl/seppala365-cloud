@@ -50,8 +50,8 @@ let LocalAgents = materialize(
 // ============================================================
 // 01 - LATEST LOCAL AI AGENT INVENTORY
 // ============================================================
-// LocalAgents
-// | order by Timestamp desc
+LocalAgents
+| order by Timestamp desc
 // ============================================================
 // 02 - AGENT ADOPTION LEADERBOARD
 // Devices, accounts, installations and MCP prevalence
@@ -245,3 +245,28 @@ let LocalAgents = materialize(
 //           AutoApprove, TrustedProcess,
 //           RemoteMcpCount, LocalMcpCount
 // | order by Criticality asc, Device asc
+============================================================
+// 12 - LOCAL AI AGENTS BY PROCESS
+// Hosting process footprint: agents, devices, accounts, trust
+// and risky configurations per related process
+// ============================================================
+// LocalAgents
+// | extend Process = iff(isempty(Process), "(unknown)", Process)
+// | summarize AgentProfiles = count(),
+//             UniqueAgents = dcount(Name),
+//             Vendors = make_set(Vendor, 20),
+//             Devices = dcountif(Device, isnotempty(Device)),
+//             Users = dcountif(Account, isnotempty(Account)),
+//             TrustedCount = countif(TrustedProcess == "true"),
+//             UntrustedCount = countif(TrustedProcess == "false"),
+//             UnknownTrustCount = countif(TrustedProcess !in ("true", "false")),
+//             AutoApproving = countif(AutoApprove == "true"),
+//             RemoteMCPs = sum(RemoteMcpCount),
+//             LocalMCPs = sum(LocalMcpCount),
+//             AgentNames = make_set(Name, 30),
+//             Versions = make_set(Version, 20),
+//             LastSeen = max(Timestamp)
+//     by Process
+// | extend TotalMCPs = RemoteMCPs + LocalMCPs
+// | order by UntrustedCount desc, AutoApproving desc, AgentProfiles desc
+// ============================================================
